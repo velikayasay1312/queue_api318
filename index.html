@@ -51,31 +51,32 @@
   <div class="card">
     <h2>queuing calculator</h2>
 
-    <label>model:
-      <select id="model">
-        <option>M/M/1</option>
-        <option>M/M/c</option>
-      </select>
-    </label>
+    <form id="queueForm">
+      <label>model:
+        <select id="model">
+          <option>M/M/1</option>
+          <option>M/M/c</option>
+        </select>
+      </label>
+      <label>arrival rate λ:</label>
+      <input id="lam" type="number" value="30" step="any" />
 
-    <label>arrival rate λ:</label>
-    <input id="lam" type="number" value="30" step="any" />
+      <label>service rate μ (per server):</label>
+      <input id="mu" type="number" value="40" step="any" />
 
-    <label>service rate μ (per server):</label>
-    <input id="mu" type="number" value="40" step="any" />
+      <label>servers c (for M/M/c):</label>
+      <input id="c" type="number" value="2" step="1" min="1" />
 
-    <label>servers c (for M/M/c):</label>
-    <input id="c" type="number" value="2" step="1" min="1" />
-
-    <button id="go">YUH</button>
-
+      <button id="go" type = "submit">YUH</button>
+    </form>
     <pre id="out"></pre>
+    
   </div>
 
   <py-script>
 from math import factorial
 from js import document
-from pyscript import when  # decorator to bind DOM events to Python functions
+from pyscript import when 
 
 def erlang_c(lambd, mu, c):
     a = lambd / mu
@@ -88,8 +89,7 @@ def erlang_c(lambd, mu, c):
     Pw = last * P0
     return P0, Pw
 
-@when("click", "#go")   # <-- binds the button click to this function
-def compute(evt):
+def compute():
     model = document.getElementById("model").value
     lam = float(document.getElementById("lam").value or 0)
     mu  = float(document.getElementById("mu").value or 0)
@@ -132,6 +132,14 @@ def compute(evt):
         f"average time in system (W) = {W:.4f}\n"
         f"average wait time (Wq) = {Wq:.4f}\n"
     )
+@when("submit", "#queueForm")
+def on_submit(evt):
+  evt.preventDefault()   # stop reload
+  compute()
+@when("click", "#go")
+def on_click(evt):
+  evt.preventDefault()
+  compute()
   </py-script>
 </body>
 </html>
