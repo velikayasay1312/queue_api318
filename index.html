@@ -49,22 +49,22 @@
 </head>
 <body>
   <div class="card">
-    <h2>Queuing Calculator (Python in Browser)</h2>
+    <h2>queuing calculator</h2>
 
-    <label>Model:
+    <label>model:
       <select id="model">
         <option>M/M/1</option>
         <option>M/M/c</option>
       </select>
     </label>
 
-    <label>Arrival rate λ:</label>
+    <label>arrival rate λ:</label>
     <input id="lam" type="number" value="30" step="any" />
 
-    <label>Service rate μ (per server):</label>
+    <label>service rate μ (per server):</label>
     <input id="mu" type="number" value="40" step="any" />
 
-    <label>Servers c (for M/M/c):</label>
+    <label>servers c (for M/M/c):</label>
     <input id="c" type="number" value="2" step="1" min="1" />
 
     <button id="go">YUH</button>
@@ -115,7 +115,7 @@ def compute(evt):
         if c < 1:
             out.innerText = "Please enter c ≥ 1."
             return
-        rho = (lam / (c * mu)) * 100
+        rho = (lam / (c * mu)) 
         if rho >= 1:
             out.innerText = "Unstable (ρ ≥ 1)."
             return
@@ -126,10 +126,10 @@ def compute(evt):
         L  = lam * W
 
     out.innerText = (
-        f"traffic intensity = {rho:.3f}\n'%'"
-        f"avg number of customers in system (L) = {L:.3f}"
+        f"traffic intensity = {rho:.3f}\n"
+        f"avg number of customers in system (L) = {L:.3f}\n"
         f"average number of Customers in Line (Lq) = {Lq:.3f}\n"
-        f"average time in system (W) = {W:.4f}"
+        f"average time in system (W) = {W:.4f}\n"
         f"average wait time (Wq) = {Wq:.4f}\n"
     )
   </py-script>
