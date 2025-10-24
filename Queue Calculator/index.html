@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Python Queuing Calculator (PyScript)</title>
+
+  <!-- PyScript 2024 runtime -->
+  <link rel="stylesheet" href="https://pyscript.net/releases/2024.6.2/core.css">
+  <script type="module" src="https://pyscript.net/releases/2024.6.2/core.js"></script>
+
+  <style>
+    body {
+      font-family: Helvetica;
+      background: linear-gradient(180deg, #ffe3ee, #fff);
+      min-height: 100vh; margin: 0; display: grid; place-items: center;
+    }
+    .card {
+      background: #fff; border: 2px solid #ffb3d0; border-radius: 16px;
+      padding: 2rem; width: min(640px, 92%); box-shadow: 0 8px 24px rgba(255,128,179,.25);
+    }
+    label { display:block; margin-top: 1rem; font-weight: 600; }
+    input,
+    select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.6rem 0.7rem;
+    font-size: 1rem;
+    line-height: 1.4;
+    border: 1.5px solid #ffb3d0;
+    border-radius: 10px;
+    background-color: #fff;
+    font-family: Helvetica, Arial, sans-serif;
+    color: #333;
+    appearance: none; /* removes default arrow styling on select (so you can style consistently) */
+    }
+    button {
+      margin-top: 1rem; background: #e65f98; color: #fff; border: 0; border-radius: 10px;
+      padding: .75rem 1rem; font-weight: 700; cursor: pointer;
+    }
+    pre { background: #ffe3ee; border-radius: 10px; padding: 1rem; white-space: pre-wrap; }
+    
+    select {
+    background-image: url("data:image/svg+xml;utf8,<svg fill='%23e65f98' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 0.6rem center;
+    background-size: 1rem;
+    padding-right: 2rem; 
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>🧮 Queuing Calculator (Python in Browser)</h2>
+
+    <label>Model:
+      <select id="model">
+        <option>M/M/1</option>
+        <option>M/M/c</option>
+      </select>
+    </label>
+
+    <label>Arrival rate λ:</label>
+    <input id="lam" type="number" value="30" step="any" />
+
+    <label>Service rate μ (per server):</label>
+    <input id="mu" type="number" value="40" step="any" />
+
+    <label>Servers c (for M/M/c):</label>
+    <input id="c" type="number" value="2" step="1" min="1" />
+
+    <!-- No py-click here; we bind it from Python -->
+    <button id="go">Compute</button>
+
+    <pre id="out"></pre>
+  </div>
+
+  <py-script>
+from math import factorial
+from js import document
+from pyscript import when  # decorator to bind DOM events to Python functions
+
+def erlang_c(lambd, mu, c):
+    a = lambd / mu
+    rho = lambd / (c * mu)
+    if rho >= 1:  # unstable
+        return None, None
+    s = sum((a**n) / factorial(n) for n in range(int(c)))
+    last = (a**int(c)) / (factorial(int(c)) * (1 - rho))
+    P0 = 1 / (s + last)
+    Pw = last * P0
+    return P0, Pw
+
+@when("click", "#go")   # <-- binds the button click to this function
+def compute(evt):
+    model = document.getElementById("model").value
+    lam = float(document.getElementById("lam").value or 0)
+    mu  = float(document.getElementById("mu").value or 0)
+    c   = int(float(document.getElementById("c").value or 1))
+    out = document.getElementById("out")
+
+    if lam <= 0 or mu <= 0:
+        out.innerText = "Please enter λ > 0 and μ > 0."
+        return
+
+    if model == "M/M/1":
+        rho = lam / mu
+        if rho >= 1:
+            out.innerText = "Unstable (ρ ≥ 1)."
+            return
+        L  = rho / (1 - rho)
+        Lq = (rho**2) / (1 - rho)
+        W  = 1 / (mu - lam)
+        Wq = rho / (mu - lam)
+        P0 = 1 - rho
+        Pw = rho
+    else:
+        if c < 1:
+            out.innerText = "Please enter c ≥ 1."
+            return
+        rho = lam / (c * mu)
+        if rho >= 1:
+            out.innerText = "Unstable (ρ ≥ 1)."
+            return
+        P0, Pw = erlang_c(lam, mu, c)
+        Wq = Pw / (c * mu - lam)
+        W  = Wq + 1 / mu
+        Lq = lam * Wq
+        L  = lam * W
+
+    out.innerText = (
+        f"ρ = {rho:.3f}\n"
+        f"L = {L:.3f}, Lq = {Lq:.3f}\n"
+        f"W = {W:.4f}, Wq = {Wq:.4f}\n"
+        f"P0 = {P0:.3f}, P(wait) = {Pw:.3f}"
+    )
+  </py-script>
+</body>
+</html>
