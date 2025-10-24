@@ -2,9 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Python Queuing Calculator (PyScript)</title>
+  <title>Queuing Calculator</title>
 
-  <!-- PyScript 2024 runtime -->
   <link rel="stylesheet" href="https://pyscript.net/releases/2024.6.2/core.css">
   <script type="module" src="https://pyscript.net/releases/2024.6.2/core.js"></script>
 
@@ -50,7 +49,7 @@
 </head>
 <body>
   <div class="card">
-    <h2>Queuing Calculator</h2>
+    <h2>Queuing Calculator (Python in Browser)</h2>
 
     <label>Model:
       <select id="model">
@@ -68,8 +67,7 @@
     <label>Servers c (for M/M/c):</label>
     <input id="c" type="number" value="2" step="1" min="1" />
 
-    <!-- No py-click here; we bind it from Python -->
-    <button id="go">Compute</button>
+    <button id="go">YUH</button>
 
     <pre id="out"></pre>
   </div>
@@ -117,7 +115,7 @@ def compute(evt):
         if c < 1:
             out.innerText = "Please enter c ≥ 1."
             return
-        rho = lam / (c * mu)
+        rho = (lam / (c * mu)) * 100
         if rho >= 1:
             out.innerText = "Unstable (ρ ≥ 1)."
             return
@@ -128,10 +126,11 @@ def compute(evt):
         L  = lam * W
 
     out.innerText = (
-        f"ρ = {rho:.3f}\n"
-        f"L = {L:.3f}, Lq = {Lq:.3f}\n"
-        f"W = {W:.4f}, Wq = {Wq:.4f}\n"
-        f"P0 = {P0:.3f}, P(wait) = {Pw:.3f}"
+        f"traffic intensity = {rho:.3f}\n'%'"
+        f"avg number of customers in system (L) = {L:.3f}"
+        f"average number of Customers in Line (Lq) = {Lq:.3f}\n"
+        f"average time in system (W) = {W:.4f}"
+        f"average wait time (Wq) = {Wq:.4f}\n"
     )
   </py-script>
 </body>
